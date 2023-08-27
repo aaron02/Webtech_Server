@@ -91,15 +91,24 @@ bool MySQLConnection::connect()
  */
 void MySQLConnection::addNode(std::string id)
 {
-    // Erstelle eine SQL-Anweisung zum Hinzufügen oder Aktualisieren eines Knotens
-    sql::PreparedStatement* delStmt;
-    delStmt = connection_->prepareStatement("INSERT INTO nodes (id) VALUES (?) ON DUPLICATE KEY UPDATE id = ?");
-    delStmt->setString(1, id);
-    delStmt->setString(2, id);
-    delStmt->executeUpdate();
-    delete delStmt;
+    try
+    {
+        // Erstelle eine SQL-Anweisung zum Hinzufügen oder Aktualisieren eines Knotens
+        sql::PreparedStatement* delStmt;
+        delStmt = connection_->prepareStatement("INSERT INTO nodes (id) VALUES (?) ON DUPLICATE KEY UPDATE id = ?");
+        delStmt->setString(1, id);
+        delStmt->setString(2, id);
+        delStmt->executeUpdate();
+        delete delStmt;
 
-    addNodeToContainer(id);
+        addNodeToContainer(id);
+    }
+    catch (const sql::SQLException& e)
+    {
+        std::cerr << "SQL Exception in addNode: " << e.what() << std::endl;
+        std::cerr << "Error Code: " << e.getErrorCode() << std::endl;
+        std::cerr << "SQL State: " << e.getSQLState() << std::endl;
+    }
 }
 
 /**
@@ -164,20 +173,29 @@ void MySQLConnection::updateNodeData(std::string id, NodeData data)
             std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_lastSeen);
             std::string str_lastSeen(buffer);
 
-            // Aktualisiere die Daten für den Knoten in der Datenbank
-            sql::PreparedStatement* updateDataStmt;
-            updateDataStmt = connection_->prepareStatement("INSERT INTO node_data(id, timestamp, temperature, pressure, altitude, humidity, lux, sound) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE timestamp = VALUES(timestamp), temperature = VALUES(temperature), pressure = VALUES(pressure), altitude = VALUES(altitude), humidity = VALUES(humidity), lux = VALUES(lux), sound = VALUES(sound)");
-            updateDataStmt->setString(1, id);
-            updateDataStmt->setString(2, str_lastSeen);
-            updateDataStmt->setDouble(3, data.temperature);
-            updateDataStmt->setInt(4, data.pressure);
-            updateDataStmt->setInt(5, data.altitude);
-            updateDataStmt->setInt(6, data.humidity);
-            updateDataStmt->setInt(7, data.lux);
-            updateDataStmt->setInt(8, data.sound);
+            try
+            {
+                // Aktualisiere die Daten für den Knoten in der Datenbank
+                sql::PreparedStatement* updateDataStmt;
+                updateDataStmt = connection_->prepareStatement("INSERT INTO node_data(id, timestamp, temperature, pressure, altitude, humidity, lux, sound) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE timestamp = VALUES(timestamp), temperature = VALUES(temperature), pressure = VALUES(pressure), altitude = VALUES(altitude), humidity = VALUES(humidity), lux = VALUES(lux), sound = VALUES(sound)");
+                updateDataStmt->setString(1, id);
+                updateDataStmt->setString(2, str_lastSeen);
+                updateDataStmt->setDouble(3, data.temperature);
+                updateDataStmt->setInt(4, data.pressure);
+                updateDataStmt->setInt(5, data.altitude);
+                updateDataStmt->setInt(6, data.humidity);
+                updateDataStmt->setInt(7, data.lux);
+                updateDataStmt->setInt(8, data.sound);
 
-            updateDataStmt->executeUpdate();
-            delete updateDataStmt;
+                updateDataStmt->executeUpdate();
+                delete updateDataStmt;
+            }
+            catch (const sql::SQLException& e)
+            {
+                std::cerr << "SQL Exception in updateNodeData: " << e.what() << std::endl;
+                std::cerr << "Error Code: " << e.getErrorCode() << std::endl;
+                std::cerr << "SQL State: " << e.getSQLState() << std::endl;
+            }
         }
         else
         {
@@ -199,13 +217,22 @@ void MySQLConnection::updateNodeData(std::string id, NodeData data)
  */
 void MySQLConnection::updateNodeStatusInDB(const std::string& id, const std::string& column, bool status) 
 {
-    // Aktualisiere die Datenbank
-    sql::PreparedStatement* stmt;
-    stmt = connection_->prepareStatement("UPDATE nodes SET " + column + " = ? WHERE id = ?");
-    stmt->setInt(1, status);
-    stmt->setString(2, id);
-    stmt->executeUpdate();
-    delete stmt;
+    try
+    {
+        // Aktualisiere die Datenbank
+        sql::PreparedStatement* stmt;
+        stmt = connection_->prepareStatement("UPDATE nodes SET " + column + " = ? WHERE id = ?");
+        stmt->setInt(1, status);
+        stmt->setString(2, id);
+        stmt->executeUpdate();
+        delete stmt;
+    }
+    catch (const sql::SQLException& e)
+    {
+        std::cerr << "SQL Exception in updateNodeStatusInDB: " << e.what() << std::endl;
+        std::cerr << "Error Code: " << e.getErrorCode() << std::endl;
+        std::cerr << "SQL State: " << e.getSQLState() << std::endl;
+    }
 }
 
 /**
