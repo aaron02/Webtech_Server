@@ -109,7 +109,7 @@ public:
     void deleteNode(std::string id);
 
     /* Aktuallisiert Node Daten für den gegebenen Node */
-    void updateNodeData(std::string id, NodeData data);
+    void updateNodeData(std::string id, NodeData data, bool forceData = false);
 
     /* Setze gegebenen Node zum Status Online */
     void setNodeOnline(std::string id, bool online, bool saveToDB = true);

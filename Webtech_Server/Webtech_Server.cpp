@@ -74,7 +74,11 @@ int main()
     // Programm Shutdown Prozedur
     std::cerr << "Shuting Down..." << std::endl;
 
-    // Beenden Sie den Listener ordnungsgemäß
+    // Setze Alle Nodes auf Offline
+    for (auto node : sMySQL.getNodeContainer())
+        sMySQL.updateNodeStatusInDB(node.id, "online", false);
+
+    // Beenden der Listener
     std::cerr << "Shutdown Startet for MQTTListener (Connections)" << std::endl;
     listener_connection.disconnect();
 

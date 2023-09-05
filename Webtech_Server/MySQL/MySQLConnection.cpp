@@ -158,14 +158,14 @@ void MySQLConnection::deleteNode(std::string id)
  * @param id ID des zu aktualisierenden Knotens.
  * @param data NodeData Struktur mit den zu aktualisierenden Daten für den Knoten.
  */
-void MySQLConnection::updateNodeData(std::string id, NodeData data)
+void MySQLConnection::updateNodeData(std::string id, NodeData data, bool forceData)
 {   
     // Setzt den Zeitstempel für den letzten Update-Vorgang
     setLastSeen(id);
 
     if (isNodeInDatabase(id))
     {
-        if (isAllowed(id))
+        if (isAllowed(id) || forceData)
         {
             // Konvertiere time_t in ein formatierbares Zeitstempelformat
             std::tm* tm_lastSeen = std::localtime(&data.timeStamp);
